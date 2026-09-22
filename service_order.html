@@ -7,10 +7,16 @@
 
     <h2>My Service Order Mashup</h2>
 
-    <p>
-        Service Order:
-        <strong>name_CAP</strong>
-    </p>
+    <p id="result">Loading...</p>
+
+    <script>
+        // SAP passes values via query string, e.g. ?name=SO123&status=Released
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name') || 'name_CAP';
+        const status = params.get('status') || 'status_CAP';
+        document.getElementById('result').innerHTML =
+            '<strong>' + name + '</strong> is <strong>' + status + '</strong>';
+    </script>
 
 </body>
 </html>
