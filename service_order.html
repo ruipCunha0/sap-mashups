@@ -2,12 +2,44 @@
 <html>
 <head>
     <title>My Service Order Mashup</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f6f7;
+            color: #32363a;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+            padding: 24px 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 18px;
+            color: #0a6ed1;
+        }
+
+        #result {
+            font-size: 16px;
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
 
-    <h2>My Service Order Mashup</h2>
-
-    <p id="result">Loading...</p>
+    <div class="card">
+        <h2>My Service Order Mashup</h2>
+        <p id="result">Loading...</p>
+    </div>
 
     <script>
         // SAP passes values via query string, e.g. ?name=SO123&status=Released
