@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Case In Process Tracker</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f6f7;
+            color: #32363a;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+            padding: 24px 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 18px;
+            color: #0a6ed1;
+        }
+
+        p {
+            font-size: 15px;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Case In Process Tracker</h2>
+        <p id="statusLine">Status: -</p>
+        <p>In Process since: <strong id="startDate">-</strong></p>
+        <p>Due in 5 business days: <strong id="dueDate">-</strong></p>
+    </div>
+
+    <script>
+        // SAP binds these via mashup parameters, e.g. ?statusCode=In Process&startDate=2026-09-20
+        // startDate must come from a persisted SAP field (set once, via a workflow rule, when status first becomes "In Process")
+        const params = new URLSearchParams(window.location.search);
+        const statusCode = params.get('statusCode') || '';
+        const startDateRaw = params.get('startDate') || '';
+
+        function parseSapDate(value) {
+            if (!value) return null;
+            const iso = new Date(value);
+            if (!isNaN(iso.getTime())) return iso;
+            const parts = value.split('.'); // fallback for dd.mm.yyyy
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            return null;
+        }
+
+        function addBusinessDays(date, days) {
+            const result = new Date(date.getTime());
+            let added = 0;
+            while (added < days) {
+                result.setDate(result.getDate() + 1);
+                const day = result.getDay();
+                if (day !== 0 && day !== 6) added++; // skip Sat/Sun
+            }
+            return result;
+        }
+
+        function formatDate(date) {
+            const dd = String(date.getDate()).padStart(2, '0');
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            return `${dd}.${mm}.${date.getFullYear()}`;
+        }
+
+        document.getElementById('statusLine').innerHTML =
+            'Status: <strong>' + (statusCode || 'unknown') + '</strong>';
+
+        const startDate = parseSapDate(startDateRaw);
+        if (startDate) {
+            document.getElementById('startDate').textContent = formatDate(startDate);
+            document.getElementById('dueDate').textContent = formatDate(addBusinessDays(startDate, 5));
+        } else {
+            document.getElementById('startDate').textContent = 'Not yet set';
+        }
+    </script>
+
+</body>
+</html>
