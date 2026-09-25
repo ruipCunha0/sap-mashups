@@ -61,13 +61,19 @@
         const addressLine = document.getElementById('addressLine');
         const map = document.getElementById('map');
 
-        if (address && street && houseNumber && postalCode && city) {
-            const composedAddress = address + ', ' + street + ' ' + houseNumber + ', ' + postalCode + ' ' + city;
-            addressLine.textContent = address;
-            map.src = 'https://www.google.com/maps?q=' + encodeURIComponent(composedAddress) + '&output=embed';
-        } else if (address) {
-            addressLine.textContent = address;
-            map.src = 'https://www.google.com/maps?q=' + encodeURIComponent(address) + '&output=embed';
+        // Compose from whichever structured parts are present, e.g. street may lack a houseNumber
+        const structuredParts = [
+            [street, houseNumber].filter(Boolean).join(' '),
+            [postalCode, city].filter(Boolean).join(' ')
+        ].filter(Boolean);
+        const structuredAddress = structuredParts.join(', ');
+
+        const mapQuery = structuredAddress || address;
+        const displayText = address || structuredAddress;
+
+        if (mapQuery) {
+            addressLine.textContent = displayText;
+            map.src = 'https://www.google.com/maps?q=' + encodeURIComponent(mapQuery) + '&output=embed';
         } else {
             addressLine.textContent = 'No address provided';
             map.style.display = 'none';
