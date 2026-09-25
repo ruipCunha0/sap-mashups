@@ -53,11 +53,19 @@
         // SAP binds the address field via mashup parameter, e.g. ?address=Main St 1, Berlin
         const params = new URLSearchParams(window.location.search);
         const address = params.get('address') || '';
+        const street = params.get('street') || '';
+        const houseNumber = params.get('houseNumber') || '';
+        const city = params.get('city') || '';
+        const postalCode = params.get('postalCode') || '';
 
         const addressLine = document.getElementById('addressLine');
         const map = document.getElementById('map');
 
-        if (address) {
+        if (address && street && houseNumber && postalCode && city) {
+            const composedAddress = address + ', ' + street + ' ' + houseNumber + ', ' + postalCode + ' ' + city;
+            addressLine.textContent = address;
+            map.src = 'https://www.google.com/maps?q=' + encodeURIComponent(composedAddress) + '&output=embed';
+        } else if (address) {
             addressLine.textContent = address;
             map.src = 'https://www.google.com/maps?q=' + encodeURIComponent(address) + '&output=embed';
         } else {
