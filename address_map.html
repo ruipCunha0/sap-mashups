@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Address Map Mashup</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f6f7;
+            color: #32363a;
+            display: flex;
+            justify-content: center;
+            padding: 24px 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+            color: #0a6ed1;
+        }
+
+        #addressLine {
+            font-size: 14px;
+            margin: 0 0 12px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 350px;
+            border: 0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Address Map</h2>
+        <p id="addressLine">-</p>
+        <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <script>
+        // SAP binds the address field via mashup parameter, e.g. ?address=Main St 1, Berlin
+        const params = new URLSearchParams(window.location.search);
+        const address = params.get('address') || '';
+
+        const addressLine = document.getElementById('addressLine');
+        const map = document.getElementById('map');
+
+        if (address) {
+            addressLine.textContent = address;
+            map.src = 'https://www.google.com/maps?q=' + encodeURIComponent(address) + '&output=embed';
+        } else {
+            addressLine.textContent = 'No address provided';
+            map.style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
