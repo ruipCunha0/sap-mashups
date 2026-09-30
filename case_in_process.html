@@ -38,56 +38,21 @@
 
     <div class="card">
         <h2>Case In Process Tracker</h2>
-        <p id="statusLine">Status: -</p>
-        <p>In Process since: <strong id="startDate">-</strong></p>
-        <p>Due in 5 business days: <strong id="dueDate">-</strong></p>
+        <p>Lead ID: <strong id="leadID">-</strong></p>
+        <p>Lead Name: <strong id="leadName">-</strong></p>
+        <p>Lead Display ID: <strong id="leadDisplayId">-</strong></p>
     </div>
 
     <script>
-        // SAP binds these via mashup parameters, e.g. ?statusCode=In Process&startDate=2026-09-20
-        // startDate must come from a persisted SAP field (set once, via a workflow rule, when status first becomes "In Process")
+        // SAP binds these via mashup parameters, e.g. ?leadID=...&leadName=...&leadDisplayId=...
         const params = new URLSearchParams(window.location.search);
-        const statusCode = params.get('statusCode') || '';
-        const startDateRaw = params.get('startDate') || '';
+        const leadID = params.get('leadID') || '';
+        const leadName = params.get('leadName') || '';
+        const leadDisplayId = params.get('leadDisplayId') || '';
 
-        function parseSapDate(value) {
-            if (!value) return null;
-            const iso = new Date(value);
-            if (!isNaN(iso.getTime())) return iso;
-            const parts = value.split('.'); // fallback for dd.mm.yyyy
-            if (parts.length === 3) {
-                return new Date(parts[2], parts[1] - 1, parts[0]);
-            }
-            return null;
-        }
-
-        function addBusinessDays(date, days) {
-            const result = new Date(date.getTime());
-            let added = 0;
-            while (added < days) {
-                result.setDate(result.getDate() + 1);
-                const day = result.getDay();
-                if (day !== 0 && day !== 6) added++; // skip Sat/Sun
-            }
-            return result;
-        }
-
-        function formatDate(date) {
-            const dd = String(date.getDate()).padStart(2, '0');
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            return `${dd}.${mm}.${date.getFullYear()}`;
-        }
-
-        document.getElementById('statusLine').innerHTML =
-            'Status: <strong>' + (statusCode || 'unknown') + '</strong>';
-
-        const startDate = parseSapDate(startDateRaw);
-        if (startDate) {
-            document.getElementById('startDate').textContent = formatDate(startDate);
-            document.getElementById('dueDate').textContent = formatDate(addBusinessDays(startDate, 5));
-        } else {
-            document.getElementById('startDate').textContent = 'Not yet set';
-        }
+        document.getElementById('leadID').textContent = leadID || 'Not set';
+        document.getElementById('leadName').textContent = leadName || 'Not set';
+        document.getElementById('leadDisplayId').textContent = leadDisplayId || 'Not set';
     </script>
 
 </body>
