@@ -109,15 +109,15 @@
             document.getElementById("leadDetails").classList.remove("hidden");
         }
 
-        // O mashup (configurado no SAP Sales and Service Cloud) deve passar o ID
-        // do Case atual como parâmetro de URL, por exemplo:
-        // https://.../case_in_process.html?caseId={ID}
-        const caseId = getQueryParam("caseId");
+        // O mashup (configurado no SAP Sales and Service Cloud) deve vincular
+        // diretamente a extensão CAP_LEAD do Case como parâmetro de URL, por
+        // exemplo: https://.../case_in_process.html?leadId={CAP_LEAD}
+        const leadId = getQueryParam("leadId");
 
-        if (!caseId) {
-            showError("Parâmetro 'caseId' em falta no URL do mashup.");
+        if (!leadId) {
+            showError("Parâmetro 'leadId' em falta no URL do mashup.");
         } else {
-            fetch(`${API_BASE_URL}/api/case/${encodeURIComponent(caseId)}/lead`)
+            fetch(`${API_BASE_URL}/api/lead/${encodeURIComponent(leadId)}`)
                 .then(response => {
                     if (!response.ok) {
                         return response.json()
