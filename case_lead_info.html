@@ -1,101 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Details Mashup</title>
+    <meta charset="UTF-8" />
+    <title>Lead Info Mashup</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             font-family: "72", Arial, sans-serif;
             margin: 0;
             padding: 12px;
-            background: #fff;
-            color: #1a1a1a;
+            font-size: 14px;
+            color: #32363a;
         }
-
         .field {
-            margin-bottom: 10px;
+            display: flex;
+            margin-bottom: 8px;
         }
-
         .label {
             font-weight: bold;
-            color: #556;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
+            width: 140px;
+            flex-shrink: 0;
         }
-
         .value {
-            font-size: 15px;
-            color: #111;
+            flex-grow: 1;
         }
-
         .message {
-            font-size: 13px;
-            padding: 8px 10px;
+            padding: 8px;
             border-radius: 4px;
         }
-
         .message.loading {
-            color: #555;
-            background: #f2f2f2;
+            color: #0a6ed1;
         }
-
         .message.error {
-            color: #b00020;
-            background: #fdecea;
-        }
-
-        .hidden {
-            display: none;
+            color: #b00;
+            background: #fdeeee;
+            border: 1px solid #f0b4b4;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
+    <div id="content">
+        <div class="message loading" id="loadingMessage">A carregar dados da Lead...</div>
+    </div>
 
-    <div id="loadingMessage" class="message loading">A carregar dados da Lead...</div>
-    <div id="errorMessage" class="message error hidden"></div>
-
-    <div id="leadDetails" class="hidden">
+    <div id="leadDetails" style="display:none;">
         <div class="field">
-            <div class="label">Nome</div>
+            <div class="label">Nome:</div>
             <div class="value" id="leadName">-</div>
         </div>
         <div class="field">
-            <div class="label">Display ID</div>
+            <div class="label">Display ID:</div>
             <div class="value" id="leadDisplayId">-</div>
         </div>
         <div class="field">
-            <div class="label">Lead ID</div>
+            <div class="label">Lead ID:</div>
             <div class="value" id="leadId">-</div>
         </div>
         <div class="field">
-            <div class="label">Status</div>
+            <div class="label">Status:</div>
             <div class="value" id="leadStatus">-</div>
         </div>
     </div>
 
     <script>
-        // TODO: substituir pelo URL real da app CAP depois do deploy (cf app <nome> para o veres),
-        // por exemplo: https://ct-cx-internal-training-projects-mashup-case-srv.cfapps.eu10.hana.ondemand.com
-        const API_BASE_URL = "https://REPLACE_WITH_CAP_APP_URL";
-
-        // Nomes possíveis que o SAP Sales/Service Cloud pode usar para o
-        // parâmetro vinculado à extensão CAP_LEAD (ex: leadId, Lead_ID, LEAD_ID).
-        // A comparação é feita de forma insensível a maiúsculas/underscores,
-        // por isso qualquer uma destas variantes funciona.
-        const LEAD_ID_PARAM_CANDIDATES = ["leadid"];
+        // TODO: already pointing to the deployed CAP app. Update if the app is redeployed with a new route.
+        const API_BASE_URL = "https://dtt-tech-sa-lnsjm4g1k0br17jj-dev-ct-cx-internal-trainin7585351e.cfapps.eu10-005.hana.ondemand.com";
 
         function normalizeParamName(name) {
             return name.toLowerCase().replace(/[_-]/g, "");
         }
 
-        function getQueryParamCaseInsensitive(candidates) {
+        function getLeadIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
+            const candidates = ["leadid"];
             for (const [key, value] of params.entries()) {
                 if (candidates.includes(normalizeParamName(key))) {
                     return value;
@@ -105,57 +82,42 @@
         }
 
         function showError(message) {
-            document.getElementById("loadingMessage").classList.add("hidden");
-            document.getElementById("leadDetails").classList.add("hidden");
-            const errorEl = document.getElementById("errorMessage");
-            errorEl.textContent = message;
-            errorEl.classList.remove("hidden");
+            document.getElementById("content").innerHTML =
+                '<div class="message error">' + message + '</div>';
         }
 
         function showLeadDetails(lead) {
-            document.getElementById("loadingMessage").classList.add("hidden");
-            document.getElementById("errorMessage").classList.add("hidden");
-
+            document.getElementById("content").style.display = "none";
+            document.getElementById("leadDetails").style.display = "block";
             document.getElementById("leadName").textContent = lead.name || "-";
             document.getElementById("leadDisplayId").textContent = lead.displayId || "-";
             document.getElementById("leadId").textContent = lead.id || "-";
             document.getElementById("leadStatus").textContent = lead.status || "-";
-
-            document.getElementById("leadDetails").classList.remove("hidden");
         }
 
-        // O mashup (configurado no SAP Sales and Service Cloud) deve vincular
-        // diretamente a extensão CAP_LEAD do Case como parâmetro de URL, por
-        // exemplo: https://.../case_in_process.html?leadId={CAP_LEAD}
-        const leadId = getQueryParamCaseInsensitive(LEAD_ID_PARAM_CANDIDATES);
+        const leadId = getLeadIdFromUrl();
 
         if (!leadId) {
             showError(
-                "Parâmetro do Lead ID em falta no URL do mashup. " +
-                "URL recebido: " + window.location.href + ". " +
-                "Verifica no editor de parâmetros do mashup se o campo está vinculado à extensão CAP_LEAD."
+                "Parâmetro do Lead ID em falta no URL do mashup. URL recebido: " +
+                window.location.href +
+                ". Verifica no editor de parâmetros do mashup se o campo está vinculado à extensão CAP_LEAD."
             );
         } else {
-            fetch(`${API_BASE_URL}/api/lead/${encodeURIComponent(leadId)}`)
-                .then(response => {
+            fetch(API_BASE_URL + "/api/lead/" + encodeURIComponent(leadId))
+                .then(function (response) {
                     if (!response.ok) {
-                        return response.json()
-                            .then(body => {
-                                throw new Error(body && body.error ? body.error : `HTTP ${response.status}`);
-                            })
-                            .catch(() => {
-                                throw new Error(`HTTP ${response.status}`);
-                            });
+                        return response.json().then(function (body) {
+                            throw new Error(body.error || ("HTTP " + response.status));
+                        });
                     }
                     return response.json();
                 })
                 .then(showLeadDetails)
-                .catch(error => {
-                    console.error("Erro ao carregar dados da Lead:", error);
-                    showError("Não foi possível carregar os dados da Lead: " + error.message);
+                .catch(function (err) {
+                    showError("Não foi possível carregar os dados da Lead: " + err.message);
                 });
         }
     </script>
-
 </body>
 </html>
