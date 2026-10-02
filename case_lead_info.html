@@ -84,9 +84,24 @@
         // por exemplo: https://ct-cx-internal-training-projects-mashup-case-srv.cfapps.eu10.hana.ondemand.com
         const API_BASE_URL = "https://REPLACE_WITH_CAP_APP_URL";
 
-        function getQueryParam(name) {
+        // Nomes possíveis que o SAP Sales/Service Cloud pode usar para o
+        // parâmetro vinculado à extensão CAP_LEAD (ex: leadId, Lead_ID, LEAD_ID).
+        // A comparação é feita de forma insensível a maiúsculas/underscores,
+        // por isso qualquer uma destas variantes funciona.
+        const LEAD_ID_PARAM_CANDIDATES = ["leadid"];
+
+        function normalizeParamName(name) {
+            return name.toLowerCase().replace(/[_-]/g, "");
+        }
+
+        function getQueryParamCaseInsensitive(candidates) {
             const params = new URLSearchParams(window.location.search);
-            return params.get(name);
+            for (const [key, value] of params.entries()) {
+                if (candidates.includes(normalizeParamName(key))) {
+                    return value;
+                }
+            }
+            return null;
         }
 
         function showError(message) {
@@ -112,10 +127,14 @@
         // O mashup (configurado no SAP Sales and Service Cloud) deve vincular
         // diretamente a extensão CAP_LEAD do Case como parâmetro de URL, por
         // exemplo: https://.../case_in_process.html?leadId={CAP_LEAD}
-        const leadId = getQueryParam("leadId");
+        const leadId = getQueryParamCaseInsensitive(LEAD_ID_PARAM_CANDIDATES);
 
         if (!leadId) {
-            showError("Parâmetro 'leadId' em falta no URL do mashup.");
+            showError(
+                "Parâmetro do Lead ID em falta no URL do mashup. " +
+                "URL recebido: " + window.location.href + ". " +
+                "Verifica no editor de parâmetros do mashup se o campo está vinculado à extensão CAP_LEAD."
+            );
         } else {
             fetch(`${API_BASE_URL}/api/lead/${encodeURIComponent(leadId)}`)
                 .then(response => {
